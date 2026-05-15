@@ -1,1 +1,1 @@
-# reverse-shell-implementation
+# Remote command execution (RCE) interface
