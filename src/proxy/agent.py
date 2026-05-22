@@ -2,7 +2,8 @@ import asyncio
 import websockets
 import requests
 
-SPACE_WS = "ws://127.0.0.1:7860/ws"
+SPACE_WS = "wss://zaqks-relay.hf.space/ws"
+# SPACE_WS = "ws://127.0.0.1:7860/ws"
 LOCAL_HTTP = "http://127.0.0.1:8888"
 LOCAL_WS = "ws://127.0.0.1:8888"
 
