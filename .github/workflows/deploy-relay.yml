@@ -1,11 +1,11 @@
-name: Deploy frps to Hugging Face Space
+name: Deploy relay to Hugging Face Space
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "src/frps/**"
+      - "src/proxy/**"
 
 jobs:
   deploy:
@@ -19,14 +19,14 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          cd src/frps
+          cd src/proxy
 
           git init
 
           git config user.email "github-actions@users.noreply.github.com"
           git config user.name "github-actions"
 
-          git remote add origin https://zaqks:${HF_TOKEN}@huggingface.co/spaces/zaqks/frps
+          git remote add origin https://zaqks:${HF_TOKEN}@huggingface.co/spaces/zaqks/relay
 
           git add .
 
