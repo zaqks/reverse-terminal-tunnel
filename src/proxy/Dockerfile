@@ -1,12 +1,11 @@
 FROM python:3.12
 
 WORKDIR /app
+COPY . .
 
-COPY requirements.txt .
 RUN pip install uv
 RUN uv pip install -r requirements
 
-COPY relay.py .
 
 EXPOSE 7860
 
