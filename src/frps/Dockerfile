@@ -11,6 +11,6 @@ RUN wget https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_$
     && mv frp_${FRP_VERSION}_linux_amd64/* . \
     && rm -rf frp_${FRP_VERSION}_linux_amd64*
 
-EXPOSE 7000 7500
+EXPOSE 7860 7860
 
 CMD ["./frps", "-c", "./frps.ini"]
