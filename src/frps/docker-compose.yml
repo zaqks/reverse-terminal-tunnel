@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  frps:
+    build: .
+    container_name: frps
+    restart: unless-stopped
+    ports:
+      - 7860:7860
+    volumes:
+      - ./frps.ini:/app/frps.ini
