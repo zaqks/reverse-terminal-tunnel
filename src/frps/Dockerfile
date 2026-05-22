@@ -13,4 +13,5 @@ RUN wget https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_$
 
 EXPOSE 7860 7860
 
+COPY frps.ini .
 CMD ["./frps", "-c", "./frps.ini"]
