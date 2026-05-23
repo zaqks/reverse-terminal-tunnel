@@ -1,0 +1,27 @@
+services:
+
+  relay:
+    build:
+      context: ./src/relay
+      dockerfile: Dockerfile
+    ports:
+      - 7860:7860
+
+    volumes:
+      - ./src/relay:/app
+
+  agent:
+    build:
+      context: ./src/agent
+      dockerfile: Dockerfile
+
+    volumes:
+      - ./src/agent:/app
+
+    env_file:
+      - ./src/agent/.env
+
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    command: sh
