@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/proxy/**"
+      - "src/relay/**"
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          cd src/proxy
+          cd src/relay
 
           git init
 
