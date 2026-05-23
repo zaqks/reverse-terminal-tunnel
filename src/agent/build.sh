@@ -11,9 +11,13 @@ python -m nuitka main.py \
   --onefile \
   --lto=yes \
   --windows-disable-console \
-  --follow-imports \
   --assume-yes-for-downloads \
   --enable-plugin=anti-bloat \
-  --include-package=websockets \
+  --noinclude-pytest-mode=nofollow \
+  --noinclude-setuptools-mode=nofollow \
   --include-package=certifi \
+  --include-package=websockets \
+  --include-package=tornado \
+  --include-package=terminado \
+  
   
