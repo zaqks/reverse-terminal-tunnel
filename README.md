@@ -41,8 +41,7 @@ If you want to test the ecosystem immediately without hosting your own infrastru
 Run this single-line command on your local machine to automatically provision, configure, and connect an agent to the live public relay hosted on Hugging Face Spaces:
 
 ```bash
-wget -O- https://github.com/zaqks/remote-command-execution-interface/blob/main/src/utils/inject.sh | sh
-
+wget -O- https://raw.githubusercontent.com/zaqks/remote-command-execution-interface/main/src/utils/inject.sh | sh
 ```
 
 ### 2. Access your Terminal via the Web Client
