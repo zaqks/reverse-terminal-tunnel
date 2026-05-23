@@ -9,7 +9,7 @@ BASE_URL="https://github.com/zaqks/remote-command-execution-interface/releases/d
 
 WORKDIR=".payload"
 
-AGENT_NAME="relay-agent"
+AGENT_NAME="main.bin"
 
 RELAY_HOST_WS="wss://zaqks-relay.hf.space"
 LOCAL_PORT="8888"
