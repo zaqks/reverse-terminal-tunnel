@@ -55,33 +55,19 @@ jobs:
     needs: build
 
     steps:
+      # Explicitly download the binary to the current working directory
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: agent-binary
+          path: .
 
-      - name: Checkout repo (for tagging)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-      - name: Create and push version tag
-        run: |
-          TAG="v$(date +'%Y.%m.%d.%H%M%S')"
-          echo "TAG=$TAG" >> $GITHUB_ENV
-
-          git tag $TAG
-          git push origin $TAG
-
-      - name: Create GitHub Release and upload asset
+      - name: Create version tag and Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG }}
+          tag_name: v${{ github.run_number }}-${{ github.sha }} # Fallback tag if git push isn't used
+          # Or stick to your date tag dynamically:
+          # tag_name: v${{ strategy.job-index }}-${{ github.run_id }} 
           files: main.bin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
