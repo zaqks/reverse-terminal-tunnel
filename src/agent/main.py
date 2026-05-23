@@ -8,6 +8,9 @@ import asyncio
 import components.agent as agent
 import components.terminal as terminal
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # --- CONFIGURATION FROM ENVIRONMENT VARS ---
 # Simply specify the localhost port + the relay host domain/URL format
 PORT = os.getenv("LOCAL_PORT", "8888")
