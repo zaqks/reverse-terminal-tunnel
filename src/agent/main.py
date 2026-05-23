@@ -5,18 +5,19 @@ import threading
 import asyncio
 
 # Import our modular components
-import terminal
-import agent
+import components.agent as agent
+import components.terminal.terminal as terminal
 
 # --- CONFIGURATION FROM ENVIRONMENT VARS ---
 # Simply specify the localhost port + the relay host domain/URL format
 PORT = os.getenv("LOCAL_PORT", "8888")
-RELAY_HOST = os.getenv("RELAY_HOST", "zaqks-relay.hf.space")
+RELAY_HOST_WS = os.getenv("RELAY_HOST_WS", "ws://127.0.0.1:7860")
 
 # Map standard endpoints dynamically based on definitions above
 LOCAL_HTTP = f"http://127.0.0.1:{PORT}"
 LOCAL_WS = f"ws://127.0.0.1:{PORT}"
-SPACE_WS = f"wss://{RELAY_HOST}/ws"
+SPACE_WS = f"{RELAY_HOST_WS}/ws"
+
 
 def main():
     print("=" * 50)
@@ -27,9 +28,7 @@ def main():
 
     # 1. Start the Terminal server in a background daemon thread
     terminal_thread = threading.Thread(
-        target=terminal.start_terminal_server, 
-        args=(int(PORT),), 
-        daemon=True
+        target=terminal.start_terminal_server, args=(int(PORT),), daemon=True
     )
     terminal_thread.start()
 
@@ -39,7 +38,7 @@ def main():
     # 2. Initialize the main-thread event loop for the Asyncio Agent
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    
+
     agent_task = loop.create_task(agent.start_agent(SPACE_WS, LOCAL_HTTP, LOCAL_WS))
 
     try:
@@ -60,6 +59,7 @@ def main():
         terminal.stop_terminal_server()
         print("[+] Ports liberated. Shutdown complete. Goodbye.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
