@@ -1,12 +1,18 @@
 name: Build Agent Binary
 
 on:
+  workflow_dispatch:
   push:
-    tags:
-      - "v*.*.*"
+    branches: [main]
+    paths:
+      - "src/agent/**"
 
 permissions:
   contents: write
+
+concurrency:
+  group: "agent-build"
+  cancel-in-progress: true
 
 jobs:
   build:
