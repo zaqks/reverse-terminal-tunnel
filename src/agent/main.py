@@ -8,9 +8,17 @@ import asyncio
 import components.agent as agent
 import components.terminal as terminal
 
+
+# load env vars
 from dotenv import load_dotenv
 base_dir = os.path.dirname(__file__)
 load_dotenv(os.path.join(base_dir, ".env"))
+
+# ssl
+import certifi
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 # --- CONFIGURATION FROM ENVIRONMENT VARS ---
 # Simply specify the localhost port + the relay host domain/URL format
