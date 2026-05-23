@@ -1,4 +1,4 @@
-name: Build Agent Binary
+name: Release Agent
 
 on:
   workflow_dispatch:
@@ -41,6 +41,23 @@ jobs:
         if: always()
         run: |
           docker rm -f agent-container || true
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-binary
+          path: main.bin
+
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: agent-binary
 
       - name: Create GitHub Release and upload asset
         uses: softprops/action-gh-release@v2
