@@ -1,0 +1,44 @@
+name: Build Agent Binary
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t agent-builder ./src/agent
+
+      - name: Run build inside container
+        run: |
+          docker run --name agent-container -w /src/agent agent-builder ./build.sh
+
+      - name: Extract binary
+        run: |
+          docker cp agent-container:/src/agent/build/main.bin ./main.bin
+
+      - name: Cleanup container
+        if: always()
+        run: |
+          docker rm -f agent-container || true
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: main.bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
