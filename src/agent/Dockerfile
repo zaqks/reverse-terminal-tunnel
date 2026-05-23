@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
-COPY requirements.txt .
+COPY . .
+
 RUN pip install uv
 RUN uv pip install --system -r requirements.txt
 
