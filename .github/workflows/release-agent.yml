@@ -31,11 +31,11 @@ jobs:
 
       - name: Run build inside container
         run: |
-          docker run --name agent-container -w /src/agent agent-builder ./build.sh
+          docker run --name agent-container agent-builder sh -c "./build.sh"
 
       - name: Extract binary
         run: |
-          docker cp agent-container:/src/agent/build/main.bin ./main.bin
+          docker cp agent-container:/app/build/main.bin ./main.bin
 
       - name: Cleanup container
         if: always()
@@ -47,7 +47,6 @@ jobs:
         with:
           name: agent-binary
           path: main.bin
-
 
   publish:
     runs-on: ubuntu-latest
