@@ -6,7 +6,7 @@ import asyncio
 
 # Import our modular components
 import components.agent as agent
-import components.terminal.terminal as terminal
+import components.terminal as terminal
 
 # --- CONFIGURATION FROM ENVIRONMENT VARS ---
 # Simply specify the localhost port + the relay host domain/URL format

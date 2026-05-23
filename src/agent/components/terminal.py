@@ -27,16 +27,9 @@ def start_terminal_server(port=8888):
 
     term_manager = UniqueTermManager(shell_command=["/bin/bash"], extra_env=env)
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
     app = tornado.web.Application(
         [
             (r"/term", MyTermSocket, {"term_manager": term_manager}),
-            (
-                r"/(.*)",
-                tornado.web.StaticFileHandler,
-                {"path": current_dir, "default_filename": "index.html"},
-            ),
         ]
     )
 
@@ -44,7 +37,7 @@ def start_terminal_server(port=8888):
     server = tornado.httpserver.HTTPServer(app)
     server.add_sockets(sockets)
 
-    print(f"[+] Terminal backend listening on http://127.0.0.1:{port}")
+    print(f"[+] Terminal backend listening on ws://127.0.0.1:{port}/term")
     tornado.ioloop.IOLoop.current().start()
 
 

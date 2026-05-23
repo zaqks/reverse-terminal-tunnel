@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Terminal</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #terminal {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="terminal"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+
+  <script>
+    // =========================
+    // CONFIG
+    // =========================
+
+    // Set this to your backend host
+    // Examples:
+    // const HOST = "http://localhost:8000";
+    // const HOST = "https://example.com";
+    const HOST = "http://localhost:7860";
+
+    // =========================
+    // TERMINAL SETUP
+    // =========================
+
+    const term = new Terminal({
+      cursorBlink: true,
+      fontFamily: 'Courier New, monospace',
+      fontSize: 14,
+      theme: {
+        background: '#000000'
+      }
+    });
+
+    const fitAddon = new FitAddon.FitAddon();
+
+    term.loadAddon(fitAddon);
+
+    term.open(document.getElementById('terminal'));
+    fitAddon.fit();
+
+    // =========================
+    // WEBSOCKET URL
+    // =========================
+
+    const httpUrl = new URL(HOST);
+
+    const wsProtocol = httpUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    const wsUrl = `${wsProtocol}//${httpUrl.host}/term`;
+
+    const ws = new WebSocket(wsUrl);
+
+    // =========================
+    // SOCKET EVENTS
+    // =========================
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify([
+        'set_size',
+        term.rows,
+        term.cols
+      ]));
+
+      console.log('Connected to backend shell');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data[0] === 'stdout') {
+        term.write(data[1]);
+      }
+    };
+
+    ws.onclose = () => {
+      term.write(
+        '\r\n\n\x1b[31m[Process Completed - Session Closed]\x1b[0m\r\n'
+      );
+
+      term.write(
+        'Refresh the page (F5) to start a new bash session.\r\n'
+      );
+    };
+
+    // =========================
+    // TERMINAL INPUT
+    // =========================
+
+    term.onData((data) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify([
+          'stdin',
+          data
+        ]));
+      }
+    });
+
+    // =========================
+    // WINDOW RESIZE
+    // =========================
+
+    window.addEventListener('resize', () => {
+      fitAddon.fit();
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify([
+          'set_size',
+          term.rows,
+          term.cols
+        ]));
+      }
+    });
+  </script>
+</body>
+
+</html>
