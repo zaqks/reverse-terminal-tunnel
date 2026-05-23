@@ -28,6 +28,3 @@ nohup "./$AGENT_NAME" \
   --relay-host-ws "$RELAY_HOST_WS" &
 
 echo "Started relay-agent in background. Logs: $WORKDIR/run.log"
-
-cd ..
-rm -rf "$WORKDIR"
