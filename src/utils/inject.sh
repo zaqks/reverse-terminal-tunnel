@@ -3,7 +3,7 @@
 set -e
 
 # --- Config ---
-RELEASE_NAME="v6-0e4ce2209eae9fa6a069200dc92cad4297be6e35"
+RELEASE_NAME="v7-e5bcf6f31ee395ea71380c296e4d87c2bdb368bd"
 
 BASE_URL="https://github.com/zaqks/remote-command-execution-interface/releases/download/${RELEASE_NAME}"
 
