@@ -1,7 +1,8 @@
 FROM python:3.12-slim
 
+COPY requirements.txt .
 RUN pip install uv
 RUN uv pip install --system -r requirements.txt
 
-RUN apt update
-RUN apt install patchelf binutils build-essential
+RUN apt-get update
+RUN apt-get install -y patchelf binutils build-essential

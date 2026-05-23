@@ -9,7 +9,8 @@ import components.agent as agent
 import components.terminal as terminal
 
 from dotenv import load_dotenv
-load_dotenv()
+base_dir = os.path.dirname(__file__)
+load_dotenv(os.path.join(base_dir, ".env"))
 
 # --- CONFIGURATION FROM ENVIRONMENT VARS ---
 # Simply specify the localhost port + the relay host domain/URL format

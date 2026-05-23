@@ -21,119 +21,191 @@
       width: 100vw;
       height: 100vh;
     }
+
+    /* Overlay prompt */
+    #hostOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+      color: white;
+      font-family: monospace;
+    }
+
+    #hostBox {
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+      width: 320px;
+    }
+
+    input, select, button {
+      padding: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+    }
+
+    button:hover {
+      background: #0f78d1;
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- HOST PROMPT -->
+  <div id="hostOverlay">
+    <div id="hostBox">
+      <div>Enter HOST</div>
+
+      <select id="hostHistory"></select>
+
+      <input id="hostInput" placeholder="https://example.com" />
+
+      <button onclick="startTerminal()">Start</button>
+    </div>
+  </div>
+
   <div id="terminal"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
 
   <script>
-    // =========================
-    // CONFIG
-    // =========================
-
-    // Set this to your backend host
-    // Examples:
-    // const HOST = "http://localhost:8000";
-    // const HOST = "https://example.com";
-    const HOST = "http://localhost:7860";
-
-    // =========================
-    // TERMINAL SETUP
-    // =========================
+    let HOST = null;
 
     const term = new Terminal({
       cursorBlink: true,
       fontFamily: 'Courier New, monospace',
       fontSize: 14,
-      theme: {
-        background: '#000000'
-      }
+      theme: { background: '#000000' }
     });
 
     const fitAddon = new FitAddon.FitAddon();
-
     term.loadAddon(fitAddon);
 
     term.open(document.getElementById('terminal'));
-    fitAddon.fit();
 
     // =========================
-    // WEBSOCKET URL
+    // HISTORY (localStorage)
     // =========================
+    const STORAGE_KEY = "host_history";
 
-    const httpUrl = new URL(HOST);
-
-    const wsProtocol = httpUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-
-    const wsUrl = `${wsProtocol}//${httpUrl.host}/term`;
-
-    const ws = new WebSocket(wsUrl);
-
-    // =========================
-    // SOCKET EVENTS
-    // =========================
-
-    ws.onopen = () => {
-      ws.send(JSON.stringify([
-        'set_size',
-        term.rows,
-        term.cols
-      ]));
-
-      console.log('Connected to backend shell');
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data[0] === 'stdout') {
-        term.write(data[1]);
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
       }
+    }
+
+    function saveHost(host) {
+      let history = loadHistory();
+
+      history = history.filter(h => h !== host);
+      history.unshift(host);
+
+      history = history.slice(0, 10);
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    }
+
+    function populateHistory() {
+      const sel = document.getElementById("hostHistory");
+      const history = loadHistory();
+
+      sel.innerHTML = "";
+
+      const empty = document.createElement("option");
+      empty.textContent = "Select previous host";
+      empty.value = "";
+      sel.appendChild(empty);
+
+      history.forEach(h => {
+        const opt = document.createElement("option");
+        opt.value = h;
+        opt.textContent = h;
+        sel.appendChild(opt);
+      });
+
+      sel.onchange = () => {
+        document.getElementById("hostInput").value = sel.value;
+      };
+    }
+
+    populateHistory();
+
+    // =========================
+    // START TERMINAL
+    // =========================
+    let ws;
+
+    window.startTerminal = function () {
+      const input = document.getElementById("hostInput");
+      const selected = document.getElementById("hostHistory").value;
+
+      HOST = input.value || selected;
+
+      if (!HOST) return;
+
+      saveHost(HOST);
+
+      document.getElementById("hostOverlay").style.display = "none";
+
+      initWS();
     };
 
-    ws.onclose = () => {
-      term.write(
-        '\r\n\n\x1b[31m[Process Completed - Session Closed]\x1b[0m\r\n'
-      );
+    function initWS() {
+      const httpUrl = new URL(HOST);
+      const wsProtocol = httpUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${httpUrl.host}/term`;
 
-      term.write(
-        'Refresh the page (F5) to start a new bash session.\r\n'
-      );
-    };
+      ws = new WebSocket(wsUrl);
 
-    // =========================
-    // TERMINAL INPUT
-    // =========================
+      ws.onopen = () => {
+        ws.send(JSON.stringify(['set_size', term.rows, term.cols]));
+        term.write("\r\nConnected to " + HOST + "\r\n");
+      };
 
-    term.onData((data) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify([
-          'stdin',
-          data
-        ]));
-      }
-    });
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data[0] === 'stdout') {
+          term.write(data[1]);
+        }
+      };
 
-    // =========================
-    // WINDOW RESIZE
-    // =========================
+      ws.onclose = () => {
+        term.write('\r\n\x1b[31m[Session Closed]\x1b[0m\r\n');
+      };
 
-    window.addEventListener('resize', () => {
+      term.onData((data) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(['stdin', data]));
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        fitAddon.fit();
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(['set_size', term.rows, term.cols]));
+        }
+      });
+
       fitAddon.fit();
-
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify([
-          'set_size',
-          term.rows,
-          term.cols
-        ]));
-      }
-    });
+    }
   </script>
-</body>
 
+</body>
 </html>
