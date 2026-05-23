@@ -1,0 +1,65 @@
+import os
+import sys
+import time
+import threading
+import asyncio
+
+# Import our modular components
+import terminal
+import agent
+
+# --- CONFIGURATION FROM ENVIRONMENT VARS ---
+# Simply specify the localhost port + the relay host domain/URL format
+PORT = os.getenv("LOCAL_PORT", "8888")
+RELAY_HOST = os.getenv("RELAY_HOST", "zaqks-relay.hf.space")
+
+# Map standard endpoints dynamically based on definitions above
+LOCAL_HTTP = f"http://127.0.0.1:{PORT}"
+LOCAL_WS = f"ws://127.0.0.1:{PORT}"
+SPACE_WS = f"wss://{RELAY_HOST}/ws"
+
+def main():
+    print("=" * 50)
+    print(" Starting Reverse Terminal Tunnel Orchestrator ")
+    print("=" * 50)
+    print(f"Target Relay:  {SPACE_WS}")
+    print(f"Local Server:  {LOCAL_HTTP}\n")
+
+    # 1. Start the Terminal server in a background daemon thread
+    terminal_thread = threading.Thread(
+        target=terminal.start_terminal_server, 
+        args=(int(PORT),), 
+        daemon=True
+    )
+    terminal_thread.start()
+
+    # Give Tornado a brief moment to bind to the port before launching agent
+    time.sleep(1)
+
+    # 2. Initialize the main-thread event loop for the Asyncio Agent
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    agent_task = loop.create_task(agent.start_agent(SPACE_WS, LOCAL_HTTP, LOCAL_WS))
+
+    try:
+        loop.run_until_complete(agent_task)
+    except KeyboardInterrupt:
+        print("\n[!] Ctrl+C detected! Beginning graceful shutdown sequence...")
+    finally:
+        # 3. Graceful cleanup sequence
+        print("[*] Canceling active agent tasks...")
+        agent_task.cancel()
+        try:
+            loop.run_until_complete(agent_task)
+        except asyncio.CancelledError:
+            pass
+        loop.close()
+
+        # Stop Tornado loop & reclaim open PTY descriptors / ports
+        terminal.stop_terminal_server()
+        print("[+] Ports liberated. Shutdown complete. Goodbye.")
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()
