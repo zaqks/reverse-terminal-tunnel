@@ -25,8 +25,7 @@ chmod +x "$AGENT_NAME"
 # --- Run in background ---
 nohup "./$AGENT_NAME" \
   --local-port "$LOCAL_PORT" \
-  --relay-host-ws "$RELAY_HOST_WS" \
-  > run.log 2>&1 &
+  --relay-host-ws "$RELAY_HOST_WS" &
 
 echo "Started relay-agent in background. Logs: $WORKDIR/run.log"
 
