@@ -1,6 +1,6 @@
 # Reverse Terminal Tunnel (RTT)
 
-A lightweight, secure reverse terminal architecture that lets you access your local machine's terminal from anywhere in the world—without raw TCP tunneling or port forwarding.
+A lightweight reverse terminal architecture that lets you access your local machine's terminal from anywhere in the world, without raw TCP tunneling or port forwarding.
 
 Unlike traditional SSH or raw TCP tunnels (like Ngrok), this project relies strictly on HTTP and WebSockets multiplexed over an application layer. This makes it incredibly resilient against strict firewalls that block standard SSH ports or non-HTTP traffic.
 
