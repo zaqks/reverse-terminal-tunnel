@@ -5,7 +5,7 @@ set -e
 # --- Config ---
 RELEASE_NAME="v7-e5bcf6f31ee395ea71380c296e4d87c2bdb368bd"
 
-BASE_URL="https://github.com/zaqks/remote-command-execution-interface/releases/download/${RELEASE_NAME}"
+BASE_URL="https://github.com/zaqks/reverse-terminal-tunnel/releases/download/${RELEASE_NAME}"
 
 WORKDIR=".payload"
 

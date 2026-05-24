@@ -41,12 +41,12 @@ If you want to test the ecosystem immediately without hosting your own infrastru
 Run this single-line command on your local machine to automatically provision, configure, and connect an agent to the live public relay hosted on Hugging Face Spaces:
 
 ```bash
-wget -O- https://raw.githubusercontent.com/zaqks/remote-command-execution-interface/main/src/utils/inject.sh | sh
+wget -O- https://raw.githubusercontent.com/zaqks/reverse-terminal-tunnel/main/src/utils/inject.sh | sh
 ```
 
 ### 2. Access your Terminal via the Web Client
 
-1. Navigate to the hosted Web Client: `https://zaqks.github.io/remote-command-execution-interface/`
+1. Navigate to the hosted Web Client: `https://zaqks.github.io/reverse-terminal-tunnel/`
 2. In the host prompt overlay, input the target relay server URL: `https://zaqks-relay.hf.spaces`
 3. Click **Start** to open your real-time browser-based terminal session.
 
